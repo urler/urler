@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>URL Shortener</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+        <link href="/webjars/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"></link>
+        <script src="/webjars/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    </head>
+    <body>
+        <style>
+            input, select {
+                width: 100%;
+            }
+            .top-margin {
+                margin-top:50px;
+            }
+
+            .good {
+                color: green;
+            }
+            .bad {
+                color:red;  
+            }
+        </style>
+
+        <div class="form-row top-margin">
+            <div class="container">
+                <form class="form-inline col-md-12" onSubmit="return;">
+                    <div class="form-group col-md-10">
+                        <input type="text" class="form-control-lg" id="urlInput" placeholder="Please enter URL..."></input>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <button class="btn btn-lg btn-success" onClick="createLink()">Make it short</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row top-margin">
+            <div class="container">
+
+                <div class="col-md-12 text-center">
+                    <div class="output-message">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="row top-margin">
+            <div class="col-md-12 text-center">
+                <h4>Top ten requests for today</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="container">
+
+                <div class="col-md-12 text-center">
+                    <table id="stats" class="table table-striped table-condensed">
+                        <thead> 
+                        <th>Link</th>
+                        <th>Requests</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </body>
+
+    <script>
+
+        $(document).ready(function () {
+            $('form').on('submit', function (evt) {
+                evt.preventDefault()
+            });
+
+            loadStats();
+        });
+        function createLink() {
+            clearOutputMessage();
+
+            var origin = window.location.origin;
+            var urlValue = $('#urlInput').val();
+            var hasProtocol = /^http:\/\/|https:\/\//.test(urlValue);
+
+            if (!hasProtocol) {
+                urlValue = 'https://' + urlValue;
+            }
+            var formData = {
+                'url': urlValue,
+            }
+
+
+            $.ajax({
+                url: "/app/createLink",
+                data: formData,
+                type: 'POST',
+                dataType: 'json',
+                success: function (response) {
+                    var result = '';
+                    if (response.status === "OK") {
+                        $('.output-message').addClass("good");
+                        result = 'Congratulations!';
+                        result += '<br/>Short link for <b>' + urlValue + '</b> is <p class="text-center" style="font-size:30px;">' + origin + '/' + response.message + "</p>";
+                        $('.output-message').html(result);
+                    } else {
+                        $('.output-message').addClass("bad");
+                        result = 'Something went wrong!';
+                        result += '<br/>' + 'Please check your URL';
+                        $('.output-message').html(result);
+                    }
+                }
+            });
+
+        }
+        function clearOutputMessage() {
+            $('.output-message').html();
+            $('.output-message').removeClass("bad");
+            $('.output-message').removeClass("good");
+        }
+
+        function loadStats() {
+            $.ajax({
+                url: "/app/topTenLinks",
+                dataType: 'json',
+                success: function (response) {
+                    var json = $.parseJSON(response.message);
+                    var html = "";
+                    var origin = window.location.origin;
+                    $.each(json, function (i, item) {
+                        html += "<tr>";
+                        html += "<td>" + origin + "/" + item.link + "</td>";
+                        html += "<td>" + item.count + "</td>";
+                        html += "</tr>";
+                    });
+
+                    $('#stats tbody').append(html);
+                }
+            });
+        }
+    </script>
+
+</html>
