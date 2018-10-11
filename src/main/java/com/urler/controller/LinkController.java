@@ -36,7 +36,6 @@ public class LinkController {
         requestedLink = requestedLink.substring(1);
         Link l = linkServiceInterface.findByLink(requestedLink);
         if (l != null) {
-            System.out.println(l.getUrl());
             response.setHeader("Location", l.getUrl());
             response.setStatus(302);
             String remoteAddr = "";
@@ -83,7 +82,6 @@ public class LinkController {
     @PostMapping(value = "/app/createLink", produces = "application/json; charset=UTF-8")
     @ResponseBody
     public Response createLink(@RequestParam Map<String, String> body) {
-        System.out.println("adadas");
         String url = body.get("url");
 
         if (!AppUtils.isUrlValid(url)) {

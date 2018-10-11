@@ -49,7 +49,6 @@ public class LinkService implements LinkServiceInterface {
     @Override
     public LinkRequestStatistic getLinkRequestCountByDate(String link, Date date) {
         LinkRequestStatistic result = null;
-        System.out.println("date " + date + " link " + link);
         TypedQuery<LinkRequestStatistic> q = em.createNamedQuery(LinkRequestStatistic.FIND_BY_DATE_AND_LINK, LinkRequestStatistic.class);
         q.setParameter("date", date);
         q.setParameter("link", link);
@@ -57,7 +56,6 @@ public class LinkService implements LinkServiceInterface {
         
         try {
             result = (LinkRequestStatistic) q.getSingleResult();
-            System.out.println("result " + result);
         } catch (NoResultException nre) {
         }
 
